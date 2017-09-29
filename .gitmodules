@@ -1,0 +1,21 @@
+[submodule "auth-proxy"]
+	path = auth-proxy
+	url = https://github.com/nginxinc/auth-proxy/
+[submodule "ngra-album-manager"]
+	path = ngra-album-manager
+	url = https://github.com/nginxinc/ngra-album-manager
+[submodule "ngra-content-service"]
+	path = ngra-content-service
+	url = https://github.com/nginxinc/ngra-content-service/
+[submodule "ngra-pages"]
+	path = ngra-pages
+	url = https://github.com/nginxinc/ngra-pages/
+[submodule "ngra-photoresizer"]
+	path = ngra-photoresizer
+	url = https://github.com/nginxinc/ngra-photoresizer/
+[submodule "ngra-photouploader"]
+	path = ngra-photouploader
+	url = https://github.com/nginxinc/ngra-photouploader/
+[submodule "user-manager"]
+	path = user-manager
+	url = https://github.com/nginxinc/user-manager

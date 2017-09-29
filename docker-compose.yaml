@@ -1,0 +1,205 @@
+version: '3'
+services:
+  album-manager:
+    build: ngra-album-manager
+    image: sirnexus/album-manager:plus
+    container_name: album-manager
+    environment:
+      - DATABASE_HOST=mysql
+      - DATABASE_PASSWORD=mra_dev
+      - DATABASE_USERNAME=root
+      - NETWORK=fabric
+      - PORT=3306
+      - UPLOADER_PHOTO=http://localhost/uploader/image/uploads/photos/
+      - CONTAINER_ENGINE=local
+# When set to production, the unicorn process must be restarted in order to pick
+# up changes made app.rb
+#      - RACK_ENV=production
+#    env_file: ngra-album-manager/.env
+    ports:
+      - "82:443"
+    links:
+      - mysql
+    volumes:
+      - ./ngra-album-manager/app:/usr/src/app
+  auth-proxy:
+    build: auth-proxy
+    image: sirnexus/auth-proxy:plus
+    container_name: auth-proxy
+    volumes:
+      - ./auth-proxy/app:/usr/src/app
+    environment:
+      - AWS_ACCESS_KEY_ID=AKIAIRYIJY7WLICUDLTA
+      - AWS_REGION=us-west-1
+      - AWS_SECRET_ACCESS_KEY=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
+      - FLASK_DEBUG=True
+      - NETWORK=fabric
+      - PAGES_URL=pages
+      - REDIS_ENABLED=1
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_TTL=300
+      - CONTAINER_ENGINE=local
+    ports:
+      - "80:443"
+      - "443:443"
+    links:
+      - pages
+      - user-manager
+      - redis
+  content-db:
+    image: docker.io/rethinkdb:latest
+    container_name: content-db
+    ports:
+      - "28015:28015"
+      - "28080:8080"
+    volumes:
+      - ./rethinkdb:/data
+#
+# The content-service is written in Go and this image does not support
+# hot reloading when the *.go files are changed.
+# In order to reload changes made to the *.go files, it is necessary to
+# stop the container with the command: docker stop content-service
+# then start the container with: docker start content-service
+#
+  content-service:
+    build: ngra-content-service
+    image: sirnexus/content-service:plus
+    container_name: content-service
+    volumes:
+      - ./ngra-content-service/app:/go/src/app
+    environment:
+      - NETWORK=fabric
+      - RETHINKDB_URL=content-db:28015
+      - CONTAINER_ENGINE=local
+    ports:
+      - "86:443"
+    links:
+      - album-manager
+      - uploader
+      - user-manager
+  dynamo-db:
+    image: docker.io/deangiberson/aws-dynamodb-local:latest
+    container_name: dynamo-db
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./dynamo_db:/var/dynamodb_local
+  fake-s3:
+    image: docker.io/lphoward/fake-s3:latest
+    container_name: fake-s3
+    ports:
+      - "4569:4569"
+    volumes:
+      - ./fakes3:/fakes3_root
+  mysql:
+    image: docker.io/mysql:latest
+    container_name: mra-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=mra_dev
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+  pages:
+    build: ngra-pages
+    image: sirnexus/pages:plus
+    # env_file: ngra-pages/.env
+    environment:
+      - AWS_ACCESS_KEY_ID=AKIAIRYIJY7WLICUDLTA
+      - AWS_REGION=us-west-1
+      - AWS_SECRET_ACCESS_KEY=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
+      - NETWORK=fabric
+      - S3_BUCKET=ngra-images
+      - PHOTOMANAGER_ALBUM_PATH=/album-manager/albums
+      - PHOTOMANAGER_CATALOG_PATH=/album-manager/albums
+      - PHOTOMANAGER_ENDPOINT_URL=http://localhost
+      - PHOTOMANAGER_IMAGES_PATH=/album-manager/images
+      - PHOTOUPLOADER_ALBUM_PATH=/uploader/album
+      - PHOTOUPLOADER_ENDPOINT_URL=uploader:84
+      - PHOTOUPLOADER_IMAGE_PATH=/uploader/image
+      - REDIS_CACHE_PORT=6379
+      - REDIS_CACHE_URL=redis
+      - SYMFONY_ENV=dev
+      - CONTAINER_ENGINE=local
+      - USERMANAGER_ENDPOINT_URL=http://localhost
+      - USERMANAGER_LOCAL_PATH=/user-manager/v1/users
+      - USERMANAGER_USER_PATH=/user-manager/v1/users
+    ports:
+      - "81:443"
+    links:
+      - album-manager
+      - uploader
+      - user-manager
+      - redis
+    volumes:
+      - ./ngra-pages/ingenious-pages/app/Resources:/ingenious-pages/app/Resources
+      - ./ngra-pages/ingenious-pages/app/web:/ingenious-pages/app/web
+      - ./ngra-pages/ingenious-pages/app/config:/ingenious-pages/app/config
+      - ./ngra-pages/ingenious-pages/web:/ingenious-pages/web
+      - ./ngra-pages/ingenious-pages/src:/ingenious-pages/src
+    container_name: pages
+  redis:
+    image: redis:3.2.0
+    container_name: mra-redis
+    ports:
+      - "6379:6379"
+  resizer:
+    build: ngra-photoresizer
+    image: sirnexus/photoresizer:plus
+    container_name: resizer
+#    volumes:
+#      - ./ngra-photoresizer/app:/usr/src/app
+    environment:
+      - AWS_ACCESS_KEY_ID=AKIAIRYIJY7WLICUDLTA
+      - AWS_REGION=us-west-1
+      - AWS_SECRET_ACCESS_KEY=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
+      - NETWORK=fabric
+      - REDIS_CACHE_PORT=6379
+      - REDIS_CACHE_URL=redis
+      - S3_BUCKET=mra-images
+      - CONTAINER_ENGINE=local
+    ports:
+      - "83:443"
+    links:
+      - redis
+  uploader:
+    build: ngra-photouploader
+    image: sirnexus/photouploader:plus
+    container_name: uploader
+    volumes:
+      - ./ngra-photouploader/app:/usr/src/app
+    environment:
+      - ALBUM_MANAGER_URL=http://album-manager:82/album-manager
+      - AWS_ACCESS_KEY_ID=AKIAIRYIJY7WLICUDLTA
+      - AWS_REGION=us-west-1
+      - AWS_SECRET_ACCESS_KEY=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
+      - NETWORK=fabric
+      - RESIZER_URL=http://resizer:83/resizer/v1/image
+      - S3_BUCKET=mra-images
+      - CONTAINER_ENGINE=local
+    ports:
+      - "84:443"
+    links:
+      - album-manager
+      - resizer
+  user-manager:
+    build: user-manager
+    image: sirnexus/user-manager:plus
+    container_name: user-manager
+    volumes:
+      - ./user-manager/app:/usr/src/app
+    ports:
+      - "85:443"
+    environment:
+      - ALBUM_MANAGER_URL=https://album-manager/albums
+      - AWS_ACCESS_KEY_ID=AKIAIRYIJY7WLICUDLTA
+      - AWS_DEFAULT_REGION=us-west-1
+      - AWS_SECRET_ACCESS_KEY=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
+      - CONTAINER_ENGINE=local
+      - DB_ENDPOINT=http://dynamo-db:8000
+      - DEV_MODE=true
+      - NETWORK=fabric
+    links:
+      - dynamo-db
+      - album-manager
