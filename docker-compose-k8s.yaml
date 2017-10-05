@@ -1,0 +1,45 @@
+version: '3'
+services:
+  album-manager:
+    build: ngra-album-manager
+    image: ngrefarch/album-manager:kubernetes
+    container_name: album-manager
+    environment:
+      - CONTAINER_ENGINE=kubernetes
+      - RACK_ENV=production
+  auth-proxy:
+    build: auth-proxy
+    image: ngrefarch/auth-proxy:kubernetes
+    container_name: auth-proxy
+    environment:
+      - CONTAINER_ENGINE=kubernetes
+  content-service:
+    build: ngra-content-service
+    image: ngrefarch/content-service:kubernetes
+    environment:
+      - CONTAINER_ENGINE=kubernetes
+  pages:
+    build: ngra-pages
+    image: ngrefarch/pages:kubernetes
+    environment:
+      - CONTAINER_ENGINE=kubernetes
+    container_name: pages
+  resizer:
+    build: ngra-photoresizer
+    image: ngrefarch/photoresizer:kubernetes
+    container_name: resizer
+    environment:
+      - CONTAINER_ENGINE=kubernetes
+  uploader:
+    build: ngra-photouploader
+    image: ngrefarch/photouploader:kubernetes
+    container_name: uploader
+    environment:
+      - CONTAINER_ENGINE=kubernetes
+  user-manager:
+    build: user-manager
+    image: ngrefarch/user-manager:kubernetes
+    container_name: user-manager
+    environment:
+      - CONTAINER_ENGINE=kubernetes
+
