@@ -2,7 +2,7 @@ version: '3'
 services:
   album-manager:
     build: ngra-album-manager
-    image: sirnexus/album-manager:plus
+    image: ngrefarch/album-manager:local
     container_name: album-manager
     environment:
       - DATABASE_HOST=mysql
@@ -24,7 +24,7 @@ services:
       - ./ngra-album-manager/app:/usr/src/app
   auth-proxy:
     build: auth-proxy
-    image: sirnexus/auth-proxy:plus
+    image: ngrefarch/auth-proxy:local
     container_name: auth-proxy
     volumes:
       - ./auth-proxy/app:/usr/src/app
@@ -64,7 +64,7 @@ services:
 #
   content-service:
     build: ngra-content-service
-    image: sirnexus/content-service:plus
+    image: ngrefarch/content-service:local
     container_name: content-service
     volumes:
       - ./ngra-content-service/app:/go/src/app
@@ -103,7 +103,7 @@ services:
       - ./mysql:/var/lib/mysql
   pages:
     build: ngra-pages
-    image: sirnexus/pages:plus
+    image: ngrefarch/pages:local
     # env_file: ngra-pages/.env
     environment:
       - AWS_ACCESS_KEY_ID=AKIAIRYIJY7WLICUDLTA
@@ -138,6 +138,7 @@ services:
       - ./ngra-pages/ingenious-pages/app/config:/ingenious-pages/app/config
       - ./ngra-pages/ingenious-pages/web:/ingenious-pages/web
       - ./ngra-pages/ingenious-pages/src:/ingenious-pages/src
+      - ./ngra-pages/ingenious-pages/less-css:/ingenious-pages/less-css
     container_name: pages
   redis:
     image: redis:3.2.0
@@ -146,7 +147,7 @@ services:
       - "6379:6379"
   resizer:
     build: ngra-photoresizer
-    image: sirnexus/photoresizer:plus
+    image: ngrefarch/photoresizer:local
     container_name: resizer
 #    volumes:
 #      - ./ngra-photoresizer/app:/usr/src/app
@@ -154,6 +155,7 @@ services:
       - AWS_ACCESS_KEY_ID=AKIAIRYIJY7WLICUDLTA
       - AWS_REGION=us-west-1
       - AWS_SECRET_ACCESS_KEY=uTECuqxRxFW7Mk65cQbSewXXR2Qvzoi4PdJAOc3Y
+      - FAKE_S3_URL=http://fake-s3:4569
       - NETWORK=fabric
       - REDIS_CACHE_PORT=6379
       - REDIS_CACHE_URL=redis
@@ -165,18 +167,20 @@ services:
       - redis
   uploader:
     build: ngra-photouploader
-    image: sirnexus/photouploader:plus
+    image: ngrefarch/photouploader:local
     container_name: uploader
     volumes:
       - ./ngra-photouploader/app:/usr/src/app
     environment:
-      - ALBUM_MANAGER_URL=http://album-manager:82/album-manager
+      - ALBUM_MANAGER_URL=http://localhost/album-manager
       - AWS_ACCESS_KEY_ID=AKIAIRYIJY7WLICUDLTA
       - AWS_REGION=us-west-1
       - AWS_SECRET_ACCESS_KEY=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
+      - DEV_MODE=true
       - NETWORK=fabric
-      - RESIZER_URL=http://resizer:83/resizer/v1/image
+      - RESIZER_URL=http://localhost/resizer/v1/image
       - S3_BUCKET=mra-images
+      - S3_HOST=http://fake-s3:4569
       - CONTAINER_ENGINE=local
     ports:
       - "84:443"
@@ -185,7 +189,7 @@ services:
       - resizer
   user-manager:
     build: user-manager
-    image: sirnexus/user-manager:plus
+    image: ngrefarch/user-manager:local
     container_name: user-manager
     volumes:
       - ./user-manager/app:/usr/src/app
@@ -200,6 +204,7 @@ services:
       - DB_ENDPOINT=http://dynamo-db:8000
       - DEV_MODE=true
       - NETWORK=fabric
+      - VERIFY_CERTS=False
     links:
       - dynamo-db
       - album-manager
