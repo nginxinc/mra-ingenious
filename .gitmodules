@@ -1,21 +1,28 @@
-[submodule "auth-proxy"]
-	path = auth-proxy
-	url = https://github.com/nginxinc/auth-proxy/
-[submodule "ngra-album-manager"]
-	path = ngra-album-manager
-	url = https://github.com/nginxinc/ngra-album-manager
-[submodule "ngra-content-service"]
-	path = ngra-content-service
-	url = https://github.com/nginxinc/ngra-content-service/
-[submodule "ngra-pages"]
-	path = ngra-pages
-	url = https://github.com/nginxinc/ngra-pages/
-[submodule "ngra-photoresizer"]
-	path = ngra-photoresizer
-	url = https://github.com/nginxinc/ngra-photoresizer/
-[submodule "ngra-photouploader"]
-	path = ngra-photouploader
-	url = https://github.com/nginxinc/ngra-photouploader/
-[submodule "user-manager"]
-	path = user-manager
-	url = https://github.com/nginxinc/user-manager
+[submodule "mra-auth-proxy"]
+	path = mra-auth-proxy
+	url = https://github.com/nginxinc/mra-auth-proxy/
+	branch = stable
+[submodule "mra-album-manager"]
+	path = mra-album-manager
+	url = https://github.com/nginxinc/mra-album-manager
+	branch = stable
+[submodule "mra-content-service"]
+	path = mra-content-service
+	url = https://github.com/nginxinc/mra-content-service
+	branch = stable
+[submodule "mra-pages"]
+	path = mra-pages
+	url = https://github.com/nginxinc/mra-pages
+	branch = stable
+[submodule "mra-photoresizer"]
+	path = mra-photoresizer
+	url = https://github.com/nginxinc/mra-photoresizer
+	branch = stable
+[submodule "mra-photouploader"]
+	path = mra-photouploader
+	url = https://github.com/nginxinc/mra-photouploader
+	branch = stable
+[submodule "mra-user-manager"]
+	path = mra-user-manager
+	url = https://github.com/nginxinc/mra-user-manager/
+	branch = stable
