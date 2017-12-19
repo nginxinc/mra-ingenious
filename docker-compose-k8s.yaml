@@ -1,45 +1,61 @@
 version: '3'
 services:
   album-manager:
-    build: ngra-album-manager
+    build:
+      context: mra-album-manager
+      args:
+        - CONTAINER_ENGINE_ARG=kubernetes
+        - GOOGLE_CLIENT_ID_ARG=<GOOGLE_CLIENT_ID>
+        - FACEBOOK_APP_ID_ARG=<FB_APP_ID>
+        - FACEBOOK_SECRET_KEY_ARG=<FB_SECRET_KEY>
     image: ngrefarch/album-manager:kubernetes
     container_name: album-manager
     environment:
-      - CONTAINER_ENGINE=kubernetes
       - RACK_ENV=production
+
   auth-proxy:
-    build: auth-proxy
+    build:
+      context: mra-auth-proxy
+      args:
+        - CONTAINER_ENGINE=kubernetes
     image: ngrefarch/auth-proxy:kubernetes
     container_name: auth-proxy
-    environment:
-      - CONTAINER_ENGINE=kubernetes
+
   content-service:
-    build: ngra-content-service
+    build:
+      context: mra-content-service
+      args:
+        - CONTAINER_ENGINE=kubernetes
     image: ngrefarch/content-service:kubernetes
-    environment:
-      - CONTAINER_ENGINE=kubernetes
+
   pages:
-    build: ngra-pages
+    build:
+      context: mra-pages
+      args:
+        - CONTAINER_ENGINE=kubernetes
     image: ngrefarch/pages:kubernetes
-    environment:
-      - CONTAINER_ENGINE=kubernetes
     container_name: pages
+
   resizer:
-    build: ngra-photoresizer
+    build:
+      context: mra-photoresizer
+      args:
+        - CONTAINER_ENGINE=kubernetes
     image: ngrefarch/photoresizer:kubernetes
     container_name: resizer
-    environment:
-      - CONTAINER_ENGINE=kubernetes
+
   uploader:
-    build: ngra-photouploader
+    build:
+      context: mra-photouploader
+      args:
+        - CONTAINER_ENGINE=kubernetes
     image: ngrefarch/photouploader:kubernetes
     container_name: uploader
-    environment:
-      - CONTAINER_ENGINE=kubernetes
+
   user-manager:
-    build: user-manager
+    build:
+      context: mra-user-manager
+      args:
+        - CONTAINER_ENGINE=kubernetes
     image: ngrefarch/user-manager:kubernetes
     container_name: user-manager
-    environment:
-      - CONTAINER_ENGINE=kubernetes
-
