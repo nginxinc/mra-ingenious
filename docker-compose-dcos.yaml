@@ -2,7 +2,7 @@ version: '3'
 services:
   album-manager:
     build:
-      context: ngra-album-manager
+      context: mra-album-manager
       args:
         - CONTAINER_ENGINE=mesos
     image: ngrefarch/album-manager:mesos
@@ -11,7 +11,7 @@ services:
       - RACK_ENV=production
   auth-proxy:
     build:
-      context: auth-proxy
+      context: mra-auth-proxy
       args:
         - CONTAINER_ENGINE=mesos
     image: ngrefarch/auth-proxy:mesos
@@ -20,13 +20,13 @@ services:
       - CONTAINER_ENGINE=mesos
   content-service:
     build:
-      context: ngra-content-service
+      context: mra-content-service
       args:
         - CONTAINER_ENGINE=mesos
     image: ngrefarch/content-service:mesos
   pages:
     build:
-      context: ngra-pages
+      context: mra-pages
       args:
         - CONTAINER_ENGINE=mesos
     image: ngrefarch/pages:mesos
@@ -35,7 +35,7 @@ services:
     container_name: pages
   resizer:
     build:
-      context: ngra-photoresizer
+      context: mra-photoresizer
       args:
         - CONTAINER_ENGINE=mesos
     image: ngrefarch/photoresizer:mesos
@@ -44,7 +44,7 @@ services:
       - CONTAINER_ENGINE=mesos
   uploader:
     build:
-      context: ngra-photouploader
+      context: mra-photouploader
       args:
         - CONTAINER_ENGINE=mesos
     image: ngrefarch/photouploader:mesos
@@ -53,7 +53,7 @@ services:
       - CONTAINER_ENGINE=mesos
   user-manager:
     build:
-      context: user-manager
+      context: mra-user-manager
       args:
         - CONTAINER_ENGINE=mesos
     image: ngrefarch/user-manager:mesos
