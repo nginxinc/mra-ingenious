@@ -224,7 +224,7 @@ services:
     image: ngrefarch/user-manager:local
     container_name: user-manager
     volumes:
-      - ./user-manager/app:/usr/src/app
+      - ./mra-user-manager/app:/usr/src/app
     ports:
       - "85:443"
     environment:
