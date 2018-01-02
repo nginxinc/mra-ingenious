@@ -243,10 +243,6 @@ function getUserLoginForm() {
 	return driver.findElement(By.id('user-login'));
 }
 
-// function getNewAlbumForm() {
-// 	return driver.findElement(By.id('album-upload'), 5000);
-// }
-
 function getAccountForm() {
 	return driver.findElement(By.id('account-manager'));
 }

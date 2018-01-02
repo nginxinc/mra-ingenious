@@ -235,7 +235,7 @@ services:
       - DB_ENDPOINT=http://dynamo-db:8000
       - DEV_MODE=true
       - NETWORK=fabric
-      - VERIFY_CERTS=False
+      - VERIFY_CERTS=false
     links:
       - dynamo-db
       - album-manager
