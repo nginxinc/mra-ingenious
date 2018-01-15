@@ -1,0 +1,28 @@
+[submodule "mra-auth-proxy"]
+	path = mra-auth-proxy
+	url = https://github.com/nginxinc/mra-auth-proxy/
+	branch = stable
+[submodule "mra-album-manager"]
+	path = mra-album-manager
+	url = https://github.com/nginxinc/mra-album-manager
+	branch = stable
+[submodule "mra-content-service"]
+	path = mra-content-service
+	url = https://github.com/nginxinc/mra-content-service
+	branch = stable
+[submodule "mra-pages"]
+	path = mra-pages
+	url = https://github.com/nginxinc/mra-pages
+	branch = stable
+[submodule "mra-photoresizer"]
+	path = mra-photoresizer
+	url = https://github.com/nginxinc/mra-photoresizer
+	branch = stable
+[submodule "mra-photouploader"]
+	path = mra-photouploader
+	url = https://github.com/nginxinc/mra-photouploader
+	branch = stable
+[submodule "mra-user-manager"]
+	path = mra-user-manager
+	url = https://github.com/nginxinc/mra-user-manager/
+	branch = stable

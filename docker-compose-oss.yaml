@@ -1,0 +1,250 @@
+version: '3'
+services:
+
+# Album Manager
+  album-manager:
+    build:
+      context: mra-album-manager
+      args:
+        - CONTAINER_ENGINE_ARG=local
+        - USE_NGINX_PLUS_ARG=false
+    image: ngrefarch/album-manager:local_oss
+    container_name: album-manager-oss
+    environment:
+      - DATABASE_HOST=mysql
+      - DATABASE_PASSWORD=mra_dev
+      - DATABASE_USERNAME=root
+      - NEWRELIC_LICENSE_KEY=<your new relic key>
+      - NETWORK=fabric
+      - PORT=3306
+      - UPLOADER_PHOTO=http://localhost/uploader/image/uploads/photos/
+    ports:
+      - "82:443"
+    links:
+      - mysql
+    volumes:
+      - ./mra-album-manager/app:/usr/src/app
+
+# Auth Proxy
+  auth-proxy:
+    build:
+      context: mra-auth-proxy
+      args:
+        - CONTAINER_ENGINE_ARG=local
+        - USE_NGINX_PLUS_ARG=false
+    image: ngrefarch/auth-proxy:local_oss
+    container_name: auth-proxy-oss
+    volumes:
+      - ./mra-auth-proxy/app:/usr/src/app
+    environment:
+      - AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY>
+      - AWS_REGION=us-west-1
+      - AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY>
+      - FLASK_DEBUG=True
+      - NETWORK=fabric
+      - PAGES_URL=pages
+      - REDIS_ENABLED=1
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_TTL=300
+      - GOOGLE_CLIENT_ID=<GOOGLE_CLIENT_ID>
+      - GOOGLE_CLIENT_SECRET=<GOOGLE_CLIENT_SECRET>
+      - FACEBOOK_APP_ID=<FACEBOOK_APP_ID>
+      - FACEBOOK_APP_SECRET=<FACEBOOK_APP_SECRET>
+    ports:
+      - "80:80"
+      - "443:443"
+    links:
+      - pages
+      - user-manager
+      - redis
+
+# Content DB
+  content-db:
+    image: docker.io/rethinkdb:latest
+    container_name: content-db
+    ports:
+      - "28015:28015"
+      - "28080:8080"
+    volumes:
+      - ./rethinkdb:/data
+
+# Content Service
+  content-service:
+    build:
+      context: mra-content-service
+      args:
+        - CONTAINER_ENGINE_ARG=local
+        - USE_NGINX_PLUS_ARG=false
+    image: ngrefarch/content-service:local_oss
+    container_name: content-service-oss
+    volumes:
+      - ./mra-content-service/app:/go/src/app
+    environment:
+      - NETWORK=fabric
+      - RETHINKDB_URL=content-db:28015
+    ports:
+      - "86:443"
+    links:
+      - album-manager
+      - uploader
+      - user-manager
+
+# Dynamo DB
+  dynamo-db:
+    image: docker.io/deangiberson/aws-dynamodb-local:latest
+    container_name: dynamo-db
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./dynamo_db:/var/dynamodb_local
+
+# Fake S3
+  fake-s3:
+    image: docker.io/lphoward/fake-s3:latest
+    container_name: fake-s3
+    ports:
+      - "4569:4569"
+    volumes:
+      - ./fakes3:/fakes3_root
+
+# MySQL
+  mysql:
+    image: docker.io/mysql:latest
+    container_name: mra-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=mra_dev
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+
+# Pages
+  pages:
+    build:
+      context: mra-pages
+      args:
+        - CONTAINER_ENGINE_ARG=local
+        - USE_NGINX_PLUS_ARG=false
+    image: ngrefarch/pages:local_oss
+    environment:
+      - CONTENTSERVICE_ENDPOINT_URL=http://localhost
+      - CONTENTSERVICE_ARTICLE_PATH=/content-service/v1/content
+      - AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY>
+      - AWS_REGION=us-west-1
+      - AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY>
+      - NETWORK=fabric
+      - S3_BUCKET=mra-images
+      - PHOTOMANAGER_ALBUM_PATH=/album-manager/albums
+      - PHOTOMANAGER_CATALOG_PATH=/album-manager/albums
+      - PHOTOMANAGER_ENDPOINT_URL=http://localhost
+      - PHOTOMANAGER_IMAGES_PATH=/album-manager/images
+      - PHOTOUPLOADER_ALBUM_PATH=/uploader/album
+      - PHOTOUPLOADER_ENDPOINT_URL=uploader:84
+      - PHOTOUPLOADER_IMAGE_PATH=/uploader/image
+      - REDIS_CACHE_PORT=6379
+      - REDIS_CACHE_URL=redis
+      - SYMFONY_ENV=dev
+      - USERMANAGER_ENDPOINT_URL=http://localhost
+      - USERMANAGER_LOCAL_PATH=/user-manager/v1/users
+      - USERMANAGER_USER_PATH=/user-manager/v1/users
+    ports:
+      - "81:443"
+    links:
+      - album-manager
+      - uploader
+      - user-manager
+      - redis
+    volumes:
+      - ./mra-pages/ingenious-pages/app/Resources:/ingenious-pages/app/Resources
+      - ./mra-pages/ingenious-pages/app/web:/ingenious-pages/app/web
+      - ./mra-pages/ingenious-pages/app/config:/ingenious-pages/app/config
+      - ./mra-pages/ingenious-pages/web:/ingenious-pages/web
+      - ./mra-pages/ingenious-pages/src:/ingenious-pages/src
+      - ./mra-pages/ingenious-pages/less-css:/ingenious-pages/less-css
+      - ./mra-pages/ingenious-pages/tests:/ingenious-pages/tests
+    container_name: pages-oss
+
+# Redis
+  redis:
+    image: redis:3.2.0
+    container_name: mra-redis
+    ports:
+      - "6379:6379"
+
+# Resizer
+  resizer:
+    build:
+      context: mra-photoresizer
+      args:
+        - CONTAINER_ENGINE_ARG=local
+        - USE_NGINX_PLUS_ARG=false
+    image: ngrefarch/photoresizer:local_oss
+    container_name: resizer-oss
+    environment:
+      - AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY>
+      - AWS_REGION=us-west-1
+      - AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY>
+      - S3_URL=http://fake-s3:4569
+      - NETWORK=fabric
+      - REDIS_CACHE_PORT=6379
+      - REDIS_CACHE_URL=redis
+      - S3_BUCKET=mra-images
+    ports:
+      - "83:443"
+    links:
+      - redis
+
+# Uploader
+  uploader:
+    build:
+      context: mra-photouploader
+      args:
+        - CONTAINER_ENGINE_ARG=local
+        - USE_NGINX_PLUS_ARG=false
+    image: ngrefarch/photouploader:local_oss
+    container_name: uploader-oss
+    volumes:
+      - ./mra-photouploader/app:/usr/src/app
+      - ./mra-photouploader/test:/usr/src/test
+    environment:
+      - ALBUM_MANAGER_URL=http://localhost/album-manager
+      - AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY>
+      - AWS_REGION=us-west-1
+      - AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY>
+      - DEV_MODE=true
+      - NETWORK=fabric
+      - RESIZER_URL=http://localhost/resizer/v1/image
+      - S3_BUCKET=mra-images
+      - S3_URL=http://fake-s3:4569
+    ports:
+      - "84:443"
+    links:
+      - album-manager
+      - resizer
+
+# User Manager
+  user-manager:
+    build:
+      context: mra-user-manager
+      args:
+        - CONTAINER_ENGINE_ARG=local
+        - USE_NGINX_PLUS_ARG=false
+    image: ngrefarch/user-manager:local_oss
+    container_name: user-manager-oss
+    volumes:
+      - ./mra-user-manager/app:/usr/src/app
+    ports:
+      - "85:443"
+    environment:
+      - ALBUM_MANAGER_URL=https://album-manager/albums
+      - AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY>
+      - AWS_DEFAULT_REGION=us-west-1
+      - AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY>
+      - DB_ENDPOINT=http://dynamo-db:8000
+      # - DEV_MODE=true
+      - NETWORK=fabric
+      - VERIFY_CERTS=false
+    links:
+      - dynamo-db
+      - album-manager

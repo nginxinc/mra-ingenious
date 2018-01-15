@@ -1,0 +1,62 @@
+version: '3'
+services:
+  album-manager:
+    build:
+      context: mra-album-manager
+      args:
+        - CONTAINER_ENGINE=mesos
+    image: ngrefarch/album-manager:mesos
+    container_name: album-manager
+    environment:
+      - RACK_ENV=production
+  auth-proxy:
+    build:
+      context: mra-auth-proxy
+      args:
+        - CONTAINER_ENGINE=mesos
+    image: ngrefarch/auth-proxy:mesos
+    container_name: auth-proxy
+    environment:
+      - CONTAINER_ENGINE=mesos
+  content-service:
+    build:
+      context: mra-content-service
+      args:
+        - CONTAINER_ENGINE=mesos
+    image: ngrefarch/content-service:mesos
+  pages:
+    build:
+      context: mra-pages
+      args:
+        - CONTAINER_ENGINE=mesos
+    image: ngrefarch/pages:mesos
+    environment:
+      - CONTAINER_ENGINE=mesos
+    container_name: pages
+  resizer:
+    build:
+      context: mra-photoresizer
+      args:
+        - CONTAINER_ENGINE=mesos
+    image: ngrefarch/photoresizer:mesos
+    container_name: resizer
+    environment:
+      - CONTAINER_ENGINE=mesos
+  uploader:
+    build:
+      context: mra-photouploader
+      args:
+        - CONTAINER_ENGINE=mesos
+    image: ngrefarch/photouploader:mesos
+    container_name: uploader
+    environment:
+      - CONTAINER_ENGINE=mesos
+  user-manager:
+    build:
+      context: mra-user-manager
+      args:
+        - CONTAINER_ENGINE=mesos
+    image: ngrefarch/user-manager:mesos
+    container_name: user-manager
+    environment:
+      - CONTAINER_ENGINE=mesos
