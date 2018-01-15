@@ -1,0 +1,61 @@
+version: '3'
+services:
+  album-manager:
+    build:
+      context: mra-album-manager
+      args:
+        - CONTAINER_ENGINE_ARG=kubernetes
+        - GOOGLE_CLIENT_ID_ARG=<GOOGLE_CLIENT_ID>
+        - FACEBOOK_APP_ID_ARG=<FB_APP_ID>
+        - FACEBOOK_SECRET_KEY_ARG=<FB_SECRET_KEY>
+    image: ngrefarch/album-manager:kubernetes
+    container_name: album-manager
+    environment:
+      - RACK_ENV=production
+
+  auth-proxy:
+    build:
+      context: mra-auth-proxy
+      args:
+        - CONTAINER_ENGINE=kubernetes
+    image: ngrefarch/auth-proxy:kubernetes
+    container_name: auth-proxy
+
+  content-service:
+    build:
+      context: mra-content-service
+      args:
+        - CONTAINER_ENGINE=kubernetes
+    image: ngrefarch/content-service:kubernetes
+
+  pages:
+    build:
+      context: mra-pages
+      args:
+        - CONTAINER_ENGINE=kubernetes
+    image: ngrefarch/pages:kubernetes
+    container_name: pages
+
+  resizer:
+    build:
+      context: mra-photoresizer
+      args:
+        - CONTAINER_ENGINE=kubernetes
+    image: ngrefarch/photoresizer:kubernetes
+    container_name: resizer
+
+  uploader:
+    build:
+      context: mra-photouploader
+      args:
+        - CONTAINER_ENGINE=kubernetes
+    image: ngrefarch/photouploader:kubernetes
+    container_name: uploader
+
+  user-manager:
+    build:
+      context: mra-user-manager
+      args:
+        - CONTAINER_ENGINE=kubernetes
+    image: ngrefarch/user-manager:kubernetes
+    container_name: user-manager
