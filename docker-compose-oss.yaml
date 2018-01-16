@@ -101,7 +101,7 @@ services:
 
 # Fake S3
   fake-s3:
-    image: docker.io/lphoward/fake-s3:latest
+    image: nginxinc/mra-fakes3:1.2.1
     container_name: fake-s3
     ports:
       - "4569:4569"
