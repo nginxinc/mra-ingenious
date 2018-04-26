@@ -199,6 +199,9 @@ services:
       - "83:443"
     links:
       - redis
+      - fake-s3
+    depends_on:
+      - fake-s3      
 
 # Uploader
   uploader:
