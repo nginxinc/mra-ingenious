@@ -22,8 +22,7 @@ services:
       - "82:443"
     links:
       - mysql
-    volumes:
-      - ./mra-album-manager/app:/usr/src/app
+    # Have to delete the volumes for now
 
 # Auth Proxy
   auth-proxy:
@@ -190,6 +189,12 @@ services:
       - REDIS_CACHE_PORT=6379
       - REDIS_CACHE_URL=redis
       - S3_BUCKET=mra-images
+      - CPU_THRESHOLD=0.9
+      - MEMORY_THRESHOLD=0.8
+      - DISK_THRESHOLD=0.05
+      - LARGE_IMAGE_SIZE=-1
+      - MEDIUM_IMAGE_SIZE=1280
+      - THUMB_IMAGE_SIZE=128
     ports:
       - "83:443"
     links:
