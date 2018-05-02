@@ -10,7 +10,7 @@ services:
     image: ngrefarch/album-manager:local
     container_name: album-manager
     environment:
-      - DATABASE_HOST=mra-mysql
+      - DATABASE_HOST=mysql
       - DATABASE_PASSWORD=mra_dev
       - DATABASE_USERNAME=root
       - NEWRELIC_LICENSE_KEY=<your new relic key>
