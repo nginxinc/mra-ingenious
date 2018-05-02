@@ -22,6 +22,8 @@ services:
       - "82:443"
     links:
       - mysql
+    depends_on:
+      - mysql  
     volumes:
       - ./mra-album-manager/app:/usr/src/app
 
@@ -58,6 +60,10 @@ services:
       - pages
       - user-manager
       - redis
+    depends_on:
+      - pages
+      - user-manager
+      - redis      
 
 # Content DB
   content-db:
@@ -89,6 +95,8 @@ services:
       - album-manager
       - uploader
       - user-manager
+    depends_on:
+      - content-db     
 
 # Dynamo DB
   dynamo-db:
@@ -101,7 +109,7 @@ services:
 
 # Fake S3
   fake-s3:
-    image: nginxinc/mra-fakes3:1.2.1
+    image: docker.io/lphoward/fake-s3:latest
     container_name: fake-s3
     ports:
       - "4569:4569"
@@ -164,6 +172,11 @@ services:
       - ./mra-pages/ingenious-pages/less-css:/ingenious-pages/less-css
       - ./mra-pages/ingenious-pages/tests:/ingenious-pages/tests
     container_name: pages-oss
+    depends_on:
+      - album-manager
+      - uploader
+      - user-manager
+      - redis
 
 # Redis
   redis:
@@ -190,10 +203,19 @@ services:
       - REDIS_CACHE_PORT=6379
       - REDIS_CACHE_URL=redis
       - S3_BUCKET=mra-images
+      - CPU_THRESHOLD=0.9
+      - MEMORY_THRESHOLD=0.8
+      - DISK_THRESHOLD=0.05
+      - LARGE_IMAGE_SIZE=-1
+      - MEDIUM_IMAGE_SIZE=1280
+      - THUMB_IMAGE_SIZE=128
     ports:
       - "83:443"
     links:
       - redis
+      - fake-s3
+    depends_on:
+      - fake-s3      
 
 # Uploader
   uploader:
@@ -222,6 +244,9 @@ services:
     links:
       - album-manager
       - resizer
+    depends_on:
+      - album-manager
+      - resizer
 
 # User Manager
   user-manager:
@@ -246,5 +271,8 @@ services:
       - NETWORK=fabric
       - VERIFY_CERTS=false
     links:
+      - dynamo-db
+      - album-manager
+    depends_on:
       - dynamo-db
       - album-manager
