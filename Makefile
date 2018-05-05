@@ -12,3 +12,6 @@ build-clean-oss:
 
 run-local:
 	docker-compose up
+
+stop:
+	docker-compose down
