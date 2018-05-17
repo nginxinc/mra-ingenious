@@ -140,10 +140,11 @@ services:
       - GOOGLE_CLIENT_ID=<GOOGLE_CLIENT_ID>
       - NETWORK=fabric
       - S3_BUCKET=mra-images
-      - PHOTOMANAGER_ALBUM_PATH=/album-manager/albums
-      - PHOTOMANAGER_CATALOG_PATH=/album-manager/albums
-      - PHOTOMANAGER_ENDPOINT_URL=http://localhost
-      - PHOTOMANAGER_IMAGES_PATH=/album-manager/images
+      - ALBUMMANAGER_ALBUM_PATH=/album-manager/albums
+      - ALBUMMANAGER_CATALOG_PATH=/album-manager/albums
+      - ALBUMMANAGER_ENDPOINT_URL=http://localhost
+      - ALBUMMANAGER_IMAGES_PATH=/album-manager/images
+      - ALBUMMANAGER_PUBLIC_PATH=/album-manager/public
       - PHOTOUPLOADER_ALBUM_PATH=/uploader/album
       - PHOTOUPLOADER_ENDPOINT_URL=uploader:84
       - PHOTOUPLOADER_IMAGE_PATH=/uploader/image
