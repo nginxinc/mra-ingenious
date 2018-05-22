@@ -86,6 +86,8 @@ services:
     environment:
       - NETWORK=fabric
       - RETHINKDB_URL=content-db:28015
+      - ALBUMS_PATH=/album-manager/albums
+      - ALBUM_MANAGER_HOST=http://localhost
     ports:
       - "86:443"
     links:
