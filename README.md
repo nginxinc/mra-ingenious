@@ -75,6 +75,19 @@ Three docker compose files are included with this service:
 - [docker-compose-k8s.yaml](docker-compose-k8s.yaml): to run on Kubernetes
 - [docker-compose-dcos.yaml](docker-compose-dcos.yaml): to run on DC/OS
 
+## Makefile 
+A _Makefile_ has been included in the project to make the process of building and running _Ingenious_ as easy as possible. 
+You can run `make <action>` to perform an action in a simple way. 
+ 
+| Action          | Description                                                            | 
+| --------------- | ---------------------------------------------------------------------- |
+| build           | Builds the Ingenious Docker images with NGINX Plus                     | 
+| build-oss       | Builds the Ingenious Docker images with NGINX OSS                      | 
+| build-clean     | Builds the Ingenious Docker images with NGINX Plus without using cache | 
+| build-clean-oss | Builds the Ingenious Docker images with NGINX OSS without using cache  | 
+| run-local       | Runs the Ingenious app in a local environment                          | 
+| stop            | Stop all the Ingenious app containers                                  |
+
 ## Going Forward
 We intend to maintain and build on this Microservices Reference Architecture by cleaning up things we may have missed, merging your pull requests, and evolving the application as we build microservices technologies. Other examples of our work with microservices include:
 
