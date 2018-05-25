@@ -148,7 +148,7 @@ services:
       - ALBUMMANAGER_IMAGES_PATH=/album-manager/images
       - ALBUMMANAGER_PUBLIC_PATH=/album-manager/public
       - PHOTOUPLOADER_ALBUM_PATH=/uploader/album
-      - PHOTOUPLOADER_ENDPOINT_URL=uploader:84
+      - PHOTOUPLOADER_ENDPOINT_URL=http://localhost
       - PHOTOUPLOADER_IMAGE_PATH=/uploader/image
       - REDIS_CACHE_PORT=6379
       - REDIS_CACHE_URL=redis
@@ -171,6 +171,7 @@ services:
       - ./mra-pages/ingenious-pages/src:/ingenious-pages/src
       - ./mra-pages/ingenious-pages/less-css:/ingenious-pages/less-css
       - ./mra-pages/ingenious-pages/tests:/ingenious-pages/tests
+      - ./mra-pages/ingenious-pages/Insert.php:/ingenious-pages/Insert.php
     container_name: pages
     depends_on:
       - album-manager
