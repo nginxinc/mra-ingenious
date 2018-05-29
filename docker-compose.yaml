@@ -5,6 +5,8 @@ services:
   album-manager:
     build:
       context: mra-album-manager
+      args:
+        - CONTAINER_ENGINE_ARG=local
     image: ngrefarch/album-manager:local
     container_name: album-manager
     environment:
@@ -29,6 +31,8 @@ services:
   auth-proxy:
     build:
       context: mra-auth-proxy
+      args:
+        - CONTAINER_ENGINE_ARG=local
     image: ngrefarch/auth-proxy:local
     container_name: auth-proxy
     volumes:
@@ -75,6 +79,8 @@ services:
   content-service:
     build:
       context: mra-content-service
+      args:
+        - CONTAINER_ENGINE_ARG=local
     image: ngrefarch/content-service:local
     container_name: content-service
     volumes:
@@ -83,6 +89,8 @@ services:
       - NETWORK=fabric
       - CONTAINER_ENGINE=local
       - RETHINKDB_URL=content-db:28015
+      - ALBUMS_PATH=/album-manager/albums
+      - ALBUM_MANAGER_HOST=http://localhost
     ports:
       - "86:443"
     links:
@@ -125,6 +133,8 @@ services:
   pages:
     build:
       context: mra-pages
+      args:
+        - CONTAINER_ENGINE_ARG=local
     image: ngrefarch/pages:local
     environment:
       - AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY>
@@ -136,12 +146,13 @@ services:
       - NETWORK=fabric
       - CONTAINER_ENGINE=local
       - S3_BUCKET=mra-images
-      - PHOTOMANAGER_ALBUM_PATH=/album-manager/albums
-      - PHOTOMANAGER_CATALOG_PATH=/album-manager/albums
-      - PHOTOMANAGER_ENDPOINT_URL=http://localhost
-      - PHOTOMANAGER_IMAGES_PATH=/album-manager/images
+      - ALBUMMANAGER_ALBUM_PATH=/album-manager/albums
+      - ALBUMMANAGER_CATALOG_PATH=/album-manager/albums
+      - ALBUMMANAGER_ENDPOINT_URL=http://localhost
+      - ALBUMMANAGER_IMAGES_PATH=/album-manager/images
+      - ALBUMMANAGER_PUBLIC_PATH=/album-manager/public
       - PHOTOUPLOADER_ALBUM_PATH=/uploader/album
-      - PHOTOUPLOADER_ENDPOINT_URL=uploader:84
+      - PHOTOUPLOADER_ENDPOINT_URL=http://localhost
       - PHOTOUPLOADER_IMAGE_PATH=/uploader/image
       - REDIS_CACHE_PORT=6379
       - REDIS_CACHE_URL=redis
@@ -164,6 +175,7 @@ services:
       - ./mra-pages/ingenious-pages/src:/ingenious-pages/src
       - ./mra-pages/ingenious-pages/less-css:/ingenious-pages/less-css
       - ./mra-pages/ingenious-pages/tests:/ingenious-pages/tests
+      - ./mra-pages/ingenious-pages/Insert.php:/ingenious-pages/Insert.php
     container_name: pages
     depends_on:
       - album-manager
@@ -183,6 +195,8 @@ services:
   resizer:
     build:
       context: mra-photoresizer
+      args:
+        - CONTAINER_ENGINE_ARG=local
     image: ngrefarch/photoresizer:local
     container_name: resizer
     environment:
@@ -212,6 +226,8 @@ services:
   uploader:
     build:
       context: mra-photouploader
+      args:
+        - CONTAINER_ENGINE_ARG=local
     image: ngrefarch/photouploader:local
     container_name: uploader
     volumes:
@@ -241,6 +257,8 @@ services:
   user-manager:
     build:
       context: mra-user-manager
+      args:
+        - CONTAINER_ENGINE_ARG=local
     image: ngrefarch/user-manager:local
     container_name: user-manager
     volumes:
