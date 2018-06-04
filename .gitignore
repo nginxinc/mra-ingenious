@@ -3,5 +3,9 @@ tests/package-lock.json
 rethinkdb
 mysql
 dynamo_db
+<<<<<<< Updated upstream
 mra-ingenious.iml
 
+=======
+*.idea
+>>>>>>> Stashed changes

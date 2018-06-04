@@ -10,8 +10,8 @@ build-clean:
 build-clean-oss:
 	docker-compose build --no-cache --build-arg USE_NGINX_PLUS_ARG=false
 
-run-local:
-	docker-compose up
+run-fabric_local:
+	docker-compose up --file fabric_docker-compose-local.yaml
 
 stop:
 	docker-compose down
