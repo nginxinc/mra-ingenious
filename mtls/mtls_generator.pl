@@ -3,9 +3,9 @@ use strict;
 use warnings;
 use Data::Dumper qw(Dumper);
 
-print `pwd` . "\n";
-
-`rm ./mtls/index.txt* ./mtls/serial && touch ./mtls/index.txt && echo '01' > ./mtls/serial`;
+# The openssl CA commands assume a DB (index.txt) and a serial file (serial)
+# These are reset every time you generate the certs, though you would want to preserve them 
+`rm ./mtls/index.txt* ./mtls/serial* && touch ./mtls/index.txt && echo '01' > ./mtls/serial`;
 unless (-e "./mtls/serial")
 {
     `echo '01' > ./mtls/serial`;
@@ -27,8 +27,8 @@ foreach my $key (keys %services)
     my %service = %{$services{$key}};
     my $directory = "./" . $service{'directory'};
     print "We are dealing with $key and putting the CA certs and keys into the '$directory' directory\n";
-    #print Dumper \%service;
-    my $opensslCommand = "openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 \\
+    my $opensslCommand = "openssl req -new \\
+        -newkey rsa:4096 -days 365 -nodes -x509 \\
         -subj  \"/C=US/ST=California/L=San Francisco/O=NGINX/OU=Professional Services/CN=$key" . "_ca\" \\
         -keyout $directory/$key" . "_ca.key \\
         -out $directory/$key". "_ca.pem";
@@ -37,8 +37,8 @@ foreach my $key (keys %services)
         formatRun($opensslCommand);
     }
     $opensslCommand = "openssl req -new \\
-        -subj \"/C=US/ST=California/L=San Francisco/O=NGINX/OU=Professional Services/CN=$key\" \\
         -newkey rsa:4096 -nodes \\
+        -subj \"/C=US/ST=California/L=San Francisco/O=NGINX/OU=Professional Services/CN=$key\" \\
         -keyout $directory/$key" . ".key \\
         -out $directory/$key" . ".csr";
     unless (-e "$directory/$key". ".csr")
@@ -92,17 +92,19 @@ foreach my $key (keys %services)
         my $connectedServiceDirectory = "./" . $connectedServiceInfo{"directory"};
         my $opensslCommand = "openssl req -new \\
             -subj \"/C=US/ST=California/L=San Francisco/O=NGINX/OU=Professional Services/CN=$connectedServiceName\" \\
-            -newkey rsa:4096 -nodes -keyout $serviceDirectory/$connectedService" . "_client.key \\
+            -newkey rsa:4096 -nodes \\
+            -keyout $serviceDirectory/$connectedService" . "_client.key \\
             -out $serviceDirectory/$connectedService" . "_client.csr";
         unless (-e "$serviceDirectory/$connectedService" . "_client.csr")
         {
             formatRun($opensslCommand);
         }
-        $opensslCommand = "openssl x509 -req -days 365 -in $serviceDirectory/$connectedService" . "_client.csr \\
-             -CA $connectedServiceDirectory/$connectedService" . "_ca.pem  \\
-             -CAkey $connectedServiceDirectory/$connectedService" . "_ca.key \\
-             -set_serial 01 \\
-             -out $serviceDirectory/$connectedService" . "_client_ss.pem";
+        $opensslCommand = "openssl x509 -req -days 365 \\
+            -in $serviceDirectory/$connectedService" . "_client.csr \\
+            -CA $connectedServiceDirectory/$connectedService" . "_ca.pem  \\
+            -CAkey $connectedServiceDirectory/$connectedService" . "_ca.key \\
+            -set_serial 01 \\
+            -out $serviceDirectory/$connectedService" . "_client_ss.pem";
         unless (-e "$serviceDirectory/$connectedService" . "_client_ss.pem")
         {
             formatRun($opensslCommand);
@@ -136,6 +138,9 @@ foreach my $key (keys %services)
         $index++;
     }
 }
+cleanUpPems();
+
+
 
 sub formatRun 
 {
@@ -144,4 +149,26 @@ sub formatRun
     $opensslCommand =~ s/  +/ /g;
     print $opensslCommand . "\n";
     `$opensslCommand`;
+}
+
+sub cleanUpPems
+{
+    #cleaning up the intermediary certs that openssl litters on the file system
+    my $localDir = "./";
+    
+    print "Working Directory: $localDir \n";
+    opendir my $dir, $localDir or die "Cannot open directory: $!";
+    my @files = readdir $dir;
+    my $rmList = "";
+    foreach my $file (@files) 
+    {
+        # The intermediary files are in the format 01.pem with hex digits
+        if($file =~ /..\.pem/)
+        {
+            $rmList .= $file . " ";
+        }
+    }
+    print "Deleting these PEM files: $rmList\n";
+    `rm $rmList`;
+    closedir $dir;
 }
