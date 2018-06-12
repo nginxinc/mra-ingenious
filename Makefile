@@ -19,3 +19,6 @@ stop:
 build-mtls:
 	./mtls/mtls_generator.pl
 	docker-compose build  --build-arg USE_MTLS_ARG=true
+
+clean-mtls:
+	./mtls/mtls_generator.pl clean
