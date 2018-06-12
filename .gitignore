@@ -6,3 +6,8 @@ dynamo_db
 mra-ingenious.iml
 
 .DS_Store
+*.pem
+/mtls/index.txt
+/mtls/index.txt.attr
+*.old
+serial
