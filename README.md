@@ -25,6 +25,8 @@ Content Service is built in Go and backed by RethinkDB. The Content Service prov
 
 Auth Proxy is a Python app that utilizes Redis' capabilities as a caching server. Making direct connections to both Pages and User Manager, Auth Proxy is used to validate the user's identity. It also serves as the gateway into the application, acting as the only public-facing service within the application.
 
+A recent addition in the 1.0.1 release of the MRA is the ability to use the [Fabric Model](https://www.nginx.com/blog/microservices-reference-architecture-nginx-fabric-model/) with Mutual-TLS (MTLS), the certificates-based mutual authentication and authorization process, that adds a layer of security and verification to the [Fabric Model](https://www.nginx.com/blog/microservices-reference-architecture-nginx-fabric-model/). The MTLS version of [Fabric Model](https://www.nginx.com/blog/microservices-reference-architecture-nginx-fabric-model/) is enabled by using the Makefile to generate the required certificates and to build the Docker images with MtLS enabled. The generation of both the service certificates and client certificates is done with service-based certificate-authority chains, so client services can generate a Certificate Signing Request that is authorized by the server service. This allows each service to use their secure key and only require that the Service CA certificate be exposed for authentication. 
+
 ## Prerequisites
 
 There are a few prerequisites that you need for your development environment
@@ -85,8 +87,10 @@ You can run `make <action>` to perform an action in a simple way.
 | build-oss       | Builds the Ingenious Docker images with NGINX OSS                      | 
 | build-clean     | Builds the Ingenious Docker images with NGINX Plus without using cache | 
 | build-clean-oss | Builds the Ingenious Docker images with NGINX OSS without using cache  | 
+| build-mtls      | Builds the Ingenious Docker images with NGINX Plus using MTLS for auth | 
 | run-local       | Runs the Ingenious app in a local environment                          | 
 | stop            | Stop all the Ingenious app containers                                  |
+| clean-mtls      | Cleans all of the certificates the are generated in the mtls prcoess   |
 
 ## Going Forward
 We intend to maintain and build on this Microservices Reference Architecture by cleaning up things we may have missed, merging your pull requests, and evolving the application as we build microservices technologies. Other examples of our work with microservices include:
