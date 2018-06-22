@@ -16,51 +16,51 @@ if ($clean eq "clean")
 
 my %services;
 
-$services{'resizer'} = { directory => "mra-photoresizer/nginx/ssl"}; 
-$services{'uploader'} = {directory => "mra-photouploader/nginx/ssl", service1 => "resizer", service2 => "album-manager" };
-$services{'content-service'} = {directory => "mra-content-service/nginx/ssl", service1 => "album-manager"   };
-$services{'pages'} = {directory => "mra-pages/nginx/ssl", service1 => "user-manager", service2 => "album-manager", service3 => "content-service", service4 => "uploader"};
-$services{'album-manager'} =  {directory => "mra-album-manager/nginx/ssl", service1 => "uploader"};
-$services{'user-manager'} = {directory => "mra-user-manager/nginx/ssl", service1 => "album-manager" };
-$services{'auth-proxy'} = {directory => "mra-auth-proxy/nginx/ssl", service1 => "user-manager", service2 => "album-manager", service3 => "content-service", service4 => "uploader", service5 => "pages", service6 => "resizer"};
+$services{'resizer'} = { directory => "mra-photoresizer/nginx/ssl", serviceList => []}; 
+$services{'uploader'} = {directory => "mra-photouploader/nginx/ssl", serviceList => ["resizer", "album-manager"]};
+$services{'content-service'} = {directory => "mra-content-service/nginx/ssl", serviceList => [ "album-manager" ]};
+$services{'pages'} = {directory => "mra-pages/nginx/ssl", serviceList => [ "user-manager",  "album-manager",  "content-service",  "uploader"]};
+$services{'album-manager'} =  {directory => "mra-album-manager/nginx/ssl", serviceList => [ "uploader"]};
+$services{'user-manager'} = {directory => "mra-user-manager/nginx/ssl", serviceList => [ "album-manager" ]};
+$services{'auth-proxy'} = {directory => "mra-auth-proxy/nginx/ssl", serviceList => [ "user-manager",  "album-manager",  "content-service",  "uploader",  "pages",  "resizer"]};
 
 # Generate the CA, Key and Cert for each service; 
 print Dumper \%services;
-foreach my $key (keys %services)
+foreach my $serviceName (keys %services)
 {
-    my %service = %{$services{$key}};
+    my %service = %{$services{$serviceName}};
     my $directory = "./" . $service{'directory'};
-    print "We are dealing with $key and putting the CA certs and keys into the '$directory' directory\n";
+    print "We are dealing with $serviceName and putting the CA certs and keys into the '$directory' directory\n";
     my $opensslCommand = "openssl req -new \\
         -newkey rsa:$encryptionBits -days 365 -nodes -x509 \\
-        -subj  \"/C=US/ST=California/L=San Francisco/O=NGINX/OU=Professional Services/CN=$key" . "_ca\" \\
-        -keyout $directory/$key" . "_ca.key \\
-        -out $directory/$key". "_ca.pem";
-    formatAndRun($opensslCommand, "$directory/$key". "_ca.pem");
+        -subj  \"/C=US/ST=California/L=San Francisco/O=NGINX/OU=Microservices Engineering/CN=$serviceName" . "_ca\" \\
+        -keyout $directory/$serviceName" . "_ca.key \\
+        -out $directory/$serviceName". "_ca.pem";
+    formatAndRun($opensslCommand, "$directory/$serviceName". "_ca.pem");
     $opensslCommand = "openssl req -new \\
         -newkey rsa:$encryptionBits -nodes \\
-        -subj \"/C=US/ST=California/L=San Francisco/O=NGINX/OU=Professional Services/CN=$key\" \\
-        -keyout $directory/$key" . ".key \\
-        -out $directory/$key" . ".csr";
-    formatAndRun($opensslCommand, "$directory/$key". ".csr");
+        -subj \"/C=US/ST=California/L=San Francisco/O=NGINX/OU=Microservices Engineering/CN=$serviceName\" \\
+        -keyout $directory/$serviceName" . ".key \\
+        -out $directory/$serviceName" . ".csr";
+    formatAndRun($opensslCommand, "$directory/$serviceName". ".csr");
     $opensslCommand = "openssl x509 -req -days 365 \\
-        -in $directory/$key" . ".csr \\ 
-        -CA $directory/$key" . "_ca.pem \\
-        -CAkey $directory/$key" . "_ca.key \\
+        -in $directory/$serviceName" . ".csr \\ 
+        -CA $directory/$serviceName" . "_ca.pem \\
+        -CAkey $directory/$serviceName" . "_ca.key \\
         -set_serial 01 \\
-        -out $directory/$key" . "_ss.pem";
-    formatAndRun($opensslCommand,  "$directory/$key". "_ss.pem");
+        -out $directory/$serviceName" . "_ss.pem";
+    formatAndRun($opensslCommand,  "$directory/$serviceName". "_ss.pem");
     my $outDirectory =  $service{'directory'};
     # the ca -out option requires that no "./" be prepended
     $opensslCommand = "openssl ca -batch \\
-        -cert $directory/$key" . "_ca.pem \\
-        -keyfile $directory/$key" . "_ca.key \\
+        -cert $directory/$serviceName" . "_ca.pem \\
+        -keyfile $directory/$serviceName" . "_ca.key \\
         -config ./mtls/ca.conf  \\
-        -out $outDirectory/$key" . ".pem \\
-        -ss_cert $directory/$key" . "_ss.pem \\
-        -infiles $directory/$key" . ".csr";
-    formatAndRun($opensslCommand, "$outDirectory/$key" . ".pem");
-    print "Done with $key \n";
+        -out $outDirectory/$serviceName" . ".pem \\
+        -ss_cert $directory/$serviceName" . "_ss.pem \\
+        -infiles $directory/$serviceName" . ".csr";
+    formatAndRun($opensslCommand, "$outDirectory/$serviceName" . ".pem");
+    print "Done with $serviceName \n";
 }
 
 print "Generate the Client CSRs, Key and Cert for each service, then copy over the service CA cert for authenticating on the client side\n";
@@ -69,19 +69,15 @@ foreach my $key (keys %services)
     print "Working on service: $key \n";
     my %service =  %{$services{$key}};
     my $serviceDirectory = "./" . $service{"directory"};
-    my $serviceLength = keys %service;
-    my $index = 1; #services start at service1;
-    print "The number of services is " . ($serviceLength - $index) . "\n";
-    while ($serviceLength > $index)
+    my @serviceList = (@{$service{"serviceList"}});
+    foreach my $connectedService (@serviceList)
     {
-        my $serviceIndex = "service" . $index;
-        my $connectedService =  $service{$serviceIndex};
         print "The connected service is: $connectedService \n";
         my %connectedServiceInfo =  %{$services{$connectedService}};
-        my $connectedServiceName =  $service{$serviceIndex} . "_" . $key;
+        my $connectedServiceName =  $connectedService . "_" . $key;
         my $connectedServiceDirectory = "./" . $connectedServiceInfo{"directory"};
         my $opensslCommand = "openssl req -new \\
-            -subj \"/C=US/ST=California/L=San Francisco/O=NGINX/OU=Professional Services/CN=$connectedServiceName\" \\
+            -subj \"/C=US/ST=California/L=San Francisco/O=NGINX/OU=Microservices Engineering/CN=$connectedServiceName\" \\
             -newkey rsa:$encryptionBits -nodes \\
             -keyout $serviceDirectory/$connectedService" . "_client.key \\
             -out $serviceDirectory/$connectedService" . "_client.csr";
@@ -110,7 +106,6 @@ foreach my $key (keys %services)
         formatAndRun($copyCommand, "$connectedServiceDirectory/$key" . "_ca.pem");
         $copyCommand = "cp $connectedServiceDirectory/$connectedService" . "_ca.pem $serviceDirectory/$connectedService" . "_ca.pem";
         formatAndRun($copyCommand, "$serviceDirectory/$connectedService" . "_ca.pem");
-        $index++;
     }
 }
 cleanUpIntermediaryPems();
