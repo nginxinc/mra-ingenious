@@ -163,12 +163,15 @@ driver.get(host).then(() => {
               driver.findElement(By.css('.right-nav-items .nav-item .add-photo-btn')).click().then(() => {
                 console.log('-- Adding photo');
                 driver.findElement(By.id('photo-upload')).then(photoUploadForm => {
+                    console.log('--- found photoUploadForm ');
                   driver.wait(until.elementIsEnabled(
                     photoUploadForm.findElement(By.xpath('//option[text()="album_' + startTime.getTime() + '"]'))
                   )).then(optionElement => {
+                      console.log('--- looking for option element');
                     driver.wait(until.elementIsVisible(optionElement));
                     return optionElement;
                   }).then(optionElement => {
+                      console.log('--- selecting option');
                     optionElement.click();
                   });
                 });
@@ -188,6 +191,42 @@ driver.get(host).then(() => {
               console.log('-- Close Add Photo Form')
               driver.findElement(By.css('.add-photo .cancel-upload')).click();
             }).then(() => {
+                // driver.navigate().refresh();
+                console.log('-- Create post');
+                rightNav.findElement(By.css('.create-post-btn')).click().then(() => {
+                    driver.findElement(By.id('post-title')).sendKeys('Test Post ' + startTime.getTime());
+                    driver.findElement(By.id('post-body')).sendKeys('This is the body for a test post. It can be much longer, but for now it is short');
+                    driver.findElement(By.id('post-author')).sendKeys('author field is required by the form. we should change that');
+                    // driver.findElement(By.id('post-photo')).sendKeys('Photo field is required by the form we should change that');
+                    // console.log('--- Getting dropdown');
+                    // driver.findElement(By.id('add-post-album-id')).then(albumSelect => {
+                    //     console.log('---- found select element ');
+                    //     driver.wait(until.elementIsEnabled(
+                    //         albumSelect.findElement(By.xpath('//option[text()="album_' + startTime.getTime() + '"]'))
+                    //     )).then(albumElement => {
+                    //         console.log('---- looking for album option element');
+                    //         driver.wait(until.elementIsVisible(albumElement));
+                    //         return albumElement;
+                    //     }).then(albumElement => {
+                    //         console.log('---- selecting album');
+                    //         albumElement.click();
+                    //     });
+                    // });
+                    driver.findElement(By.id('post-location')).sendKeys('San Francisco');
+                    driver.findElement(By.id('post-extract')).sendKeys('This is a short description of the post');
+                    driver.findElement(By.id('add-post-button')).click();
+                });
+            }).then(() => {
+                console.log('-- Confirm that the post was uploaded');
+                driver.findElement(By.id('post-loading')).getText().then(uploadMessage => {
+                    console.log('--- uploaded response message is: ' + uploadMessage);
+                    assert.ok(uploadMessage, 'There is no upload message');
+                    assert.equal(uploadMessage.toLowerCase(), 'post upload complete', 'The upload message does not indicate success');
+                });
+            }).then(() => {
+                console.log('-- Close Create Post Form');
+                driver.findElement(By.css('.create-post .cancel-upload')).click();
+            }).then(() => {
               console.log('-- Start Delete Album: album_' + startTime.getTime());
               rightNav.findElement(By.css('.delete-album-btn')).click();
             }).then(() => {
@@ -200,34 +239,13 @@ driver.get(host).then(() => {
               console.log('-- Deleted album');
               driver.findElement(By.css('.delete-album .cancel-upload')).click();
             }).then(() => {
-              console.log('-- Create post');
-              rightNav.findElement(By.css('.create-post-btn')).click().then(() => {
-                driver.findElement(By.id('post-title')).sendKeys('Test Post ' + startTime.getTime());
-                driver.findElement(By.id('post-body')).sendKeys('This is the body for a test post. It can be much longer, but for now it is short');
-                driver.findElement(By.id('post-author')).sendKeys('author field is required by the form. we should change that');
-                driver.findElement(By.id('post-photo')).sendKeys('Photo field is required by the form we should change that');
-                driver.findElement(By.id('post-location')).sendKeys('San Francisco');
-                driver.findElement(By.id('post-extract')).sendKeys('This is a short description of the post');
-                driver.findElement(By.id('add-post-button')).click();
-              });
-            }).then(() => {
-              console.log('-- Confirm that the post was uploaded');
-              driver.findElement(By.id('post-loading')).getText().then(uploadMessage => {
-                console.log('--- uploaded response message is: ' + uploadMessage);
-                assert.ok(uploadMessage, 'There is no upload message');
-                assert.equal(uploadMessage.toLowerCase(), 'post upload done', 'The upload message does not indicate success');
-              });
-            }).then(() => {
-              console.log('-- Close Create Post Form');
-              driver.findElement(By.css('.create-post .cancel-upload')).click();
-              driver.get(host + '');
-            }).then(() => {
-              driver.findElement(By.xpath('//div[contains(@class, "article-container")]//h2[contains(@class, "entry-title")]/a[text()="Test Post ' + startTime.getTime() + '"]'))
-              .getText().then(title => {
-                console.log('-- Confirm post exists');
-                console.log('--- Found post title: "' + title + '"');
-                assert.equal(title.toLowerCase(), 'test post ' + startTime.getTime(), "The title doesn't match the post");
-              });
+                driver.get(host + '');
+              // driver.findElement(By.xpath('//div[contains(@class, "article-container")]//h2[contains(@class, "entry-title")]/a[text()="Test Post ' + startTime.getTime() + '"]'))
+              // .getText().then(title => {
+              //   console.log('-- Confirm post exists');
+              //   console.log('--- Found post title: "' + title + '"');
+              //   assert.equal(title.toLowerCase(), 'test post ' + startTime.getTime(), "The title doesn't match the post");
+              // });
             });
         	});
       });
