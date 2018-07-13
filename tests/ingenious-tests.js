@@ -167,6 +167,8 @@ driver.get(host).then(() => {
                   driver.wait(until.elementIsEnabled(
                     photoUploadForm.findElement(By.xpath('//option[text()="album_' + startTime.getTime() + '"]'))
                   )).then(optionElement => {
+                      console.log(optionElement);
+                      driver.sleep(5000);
                       console.log('--- looking for option element');
                     driver.wait(until.elementIsVisible(optionElement));
                     return optionElement;
@@ -217,6 +219,7 @@ driver.get(host).then(() => {
                     driver.findElement(By.id('add-post-button')).click();
                 });
             }).then(() => {
+                driver.sleep(5000);
                 console.log('-- Confirm that the post was uploaded');
                 driver.findElement(By.id('post-loading')).getText().then(uploadMessage => {
                     console.log('--- uploaded response message is: ' + uploadMessage);
