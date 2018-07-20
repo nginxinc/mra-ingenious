@@ -124,6 +124,7 @@ services:
     container_name: mra-mysql
     environment:
       - MYSQL_ROOT_PASSWORD=mra_dev
+      - MYSQL_DATABASE=album_manager
     ports:
       - "3306:3306"
     volumes:
