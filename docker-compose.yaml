@@ -120,7 +120,7 @@ services:
 
 # MySQL
   mysql:
-    image: docker.io/mysql:latest
+    image: docker.io/mysql:5.7
     container_name: mra-mysql
     environment:
       - MYSQL_ROOT_PASSWORD=mra_dev
@@ -266,7 +266,7 @@ services:
     ports:
       - "85:443"
     environment:
-      - ALBUM_MANAGER_URL=https://album-manager/albums
+      - ALBUM_MANAGER_URL=http://localhost/album-manager/albums
       - AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY>
       - AWS_DEFAULT_REGION=us-west-1
       - AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY>
