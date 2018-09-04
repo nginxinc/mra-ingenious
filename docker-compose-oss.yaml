@@ -110,7 +110,7 @@ services:
 
 # MySQL
   mysql:
-    image: docker.io/mysql:latest
+    image: docker.io/mysql:5.7
     container_name: mra-mysql
     environment:
       - MYSQL_ROOT_PASSWORD=mra_dev
