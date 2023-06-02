@@ -1,3 +1,7 @@
+[![Project Status: Abandoned – Initial development has started, but there has not yet been a stable, usable release; the project has been abandoned and the author(s) do not intend on continuing development.](https://www.repostatus.org/badges/latest/abandoned.svg)](https://www.repostatus.org/#abandoned)
+
+# This repository has been archived. There will likely be no further development on the project and security vulnerabilities may be unaddressed.
+
 # Ingenious
 _Ingenious_ is a photo-sharing demo app created by NGINX to show the Fabric Model approach to application development. The app is designed to allow the user to login to a personalized account, and then store, view and delete their own pictures. It also includes a blog in which users can view the latest news and updates within the application.
 
